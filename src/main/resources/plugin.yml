@@ -1,0 +1,17 @@
+name: Towny-Core
+version: ${project.version}
+main: de.n04h.towny.core.Core
+api-version: 1.16
+prefix: TOWNY
+load: STARTUP
+authors: [ NoahBlaaa15 ]
+description: The Core Plugin of my Towny Server
+website: https://town.n04h.de
+commands:
+  townyreload:
+  targetEntity:
+  testpermission:
+  color:
+  town:
+  schematics:
+  worlds:
