@@ -2,6 +2,8 @@ package de.n04h.towny.core.utils;
 
 import de.n04h.towny.core.Core;
 
+import java.util.List;
+
 public class CONFIG {
 
     Core core;
@@ -70,6 +72,8 @@ public class CONFIG {
         return core.config.getString("player");
     }
 
-
+    public List<String> getChunks() {
+        return core.config.getStringList("chunks");
+    }
 
 }

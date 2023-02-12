@@ -3,10 +3,7 @@ package de.n04h.towny.core.commands;
 import de.n04h.towny.core.Core;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Server;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -20,20 +17,26 @@ public class Schematics implements Command{
 
     @Override
     public String permissionName() {
-        return null;
+        return "towny.dev";
     }
 
     @Override
     public boolean onCommand(CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args, Core core) {
         Player p = ((Player) sender);
+        Location loc1;
+        Location loc2;
         if(args.length < 1){
             sender.sendMessage(core.utilMSG.getError("Gebe /schematics help ein wenn du dir nicht sicher bist"));
             return true;
         }
         switch (args[0]) {
             case "save":
-                Location loc1 = new Location(p.getWorld(), Double.parseDouble(args[1]), Double.parseDouble(args[2]), Double.parseDouble(args[3]));
-                Location loc2 = new Location(p.getWorld(), Double.parseDouble(args[4]), Double.parseDouble(args[5]), Double.parseDouble(args[6]));
+                if(!core.playerEvents.wandLoc.containsKey(p) || core.playerEvents.wandLoc.get(p).length != 2 || args.length < 2){
+                    sender.sendMessage(core.utilMSG.getError("Gebe /schematics help ein wenn du dir nicht sicher bist"));
+                    return true;
+                }
+                loc1 = core.playerEvents.wandLoc.get(p)[0];
+                loc2 = core.playerEvents.wandLoc.get(p)[1];
                 String blocks = core.utilSchema.blocksToString(((Player) sender), loc1, loc2);
                 if(blocks.equals("PlayerError-1")){
                     p.sendMessage(Component.text(
@@ -42,9 +45,8 @@ public class Schematics implements Command{
                     break;
                 }
 
-
                 try {
-                    PrintWriter out = new PrintWriter("schema.txt");
+                    PrintWriter out = new PrintWriter("schemas/" + args[1] + ".txt");
                     out.write(blocks);
                     out.close();
                 } catch (FileNotFoundException e) {
@@ -53,12 +55,16 @@ public class Schematics implements Command{
 
                 p.sendMessage(Component.text(
                         core.utilMSG.getComplete("Schematic gespeichert, klicke mich um sie zu laden")
-                ).clickEvent(ClickEvent.suggestCommand("/schematics load")));
+                ).clickEvent(ClickEvent.suggestCommand("/schematics load " + args[1])));
 
                 break;
             case "load":
+                if(args.length < 2){
+                    sender.sendMessage(core.utilMSG.getError("Gebe /schematics help ein wenn du dir nicht sicher bist"));
+                    return true;
+                }
                 try {
-                    BufferedReader br = new BufferedReader(new FileReader(new File("schema.txt")));
+                    BufferedReader br = new BufferedReader(new FileReader(new File("schemas/" + args[1] + ".txt")));
 
                     String complete = "";
                     String temp;
@@ -77,9 +83,53 @@ public class Schematics implements Command{
                     p.sendMessage(Component.text(
                             core.utilMSG.getComplete("Schematic geladen")
                     ));
+
+                    br.close();
                 }catch(Exception e){
                     e.printStackTrace();
                 }
+                break;
+
+            case "help":
+                break;
+            case "clear":
+                if(!core.playerEvents.wandLoc.containsKey(p) || core.playerEvents.wandLoc.get(p).length != 2){
+                    sender.sendMessage(core.utilMSG.getError("Gebe /schematics help ein wenn du dir nicht sicher bist"));
+                    return true;
+                }
+                loc1 = core.playerEvents.wandLoc.get(p)[0];
+                loc2 = core.playerEvents.wandLoc.get(p)[1];
+                core.utilSchema.replaceArea(loc1,loc2, Material.AIR);
+
+                p.sendMessage(Component.text(
+                        core.utilMSG.getComplete("Bereich geleert")
+                ));
+                break;
+            case "fill":
+                if(!core.playerEvents.wandLoc.containsKey(p) || core.playerEvents.wandLoc.get(p).length != 2 || args.length < 2){
+                    sender.sendMessage(core.utilMSG.getError("Gebe /schematics help ein wenn du dir nicht sicher bist"));
+                    return true;
+                }
+                loc1 = core.playerEvents.wandLoc.get(p)[0];
+                loc2 = core.playerEvents.wandLoc.get(p)[1];
+                core.utilSchema.replaceArea(loc1,loc2, Material.valueOf(args[1]));
+
+                p.sendMessage(Component.text(
+                        core.utilMSG.getComplete("Bereich gefüllt")
+                ));
+                break;
+            case "replace":
+                if(!core.playerEvents.wandLoc.containsKey(p) || core.playerEvents.wandLoc.get(p).length != 2 || args.length < 3){
+                    sender.sendMessage(core.utilMSG.getError("Gebe /schematics help ein wenn du dir nicht sicher bist"));
+                    return true;
+                }
+                loc1 = core.playerEvents.wandLoc.get(p)[0];
+                loc2 = core.playerEvents.wandLoc.get(p)[1];
+                core.utilSchema.replaceBlockArea(loc1,loc2, Material.valueOf(args[2]), Material.valueOf(args[1]));
+
+                p.sendMessage(Component.text(
+                        core.utilMSG.getComplete("Bereich replaced")
+                ));
                 break;
         }
 

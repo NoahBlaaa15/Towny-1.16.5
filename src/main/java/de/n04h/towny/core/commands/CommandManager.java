@@ -23,6 +23,8 @@ public class CommandManager implements CommandExecutor {
         commands.add(new Town());
         commands.add(new Schematics());
         commands.add(new Worlds());
+        commands.add(new Chunkloading());
+        commands.add(new Economy());
 
         for (Command comm: commands
              ) {

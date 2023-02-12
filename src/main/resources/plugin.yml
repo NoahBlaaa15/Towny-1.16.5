@@ -1,7 +1,7 @@
 name: Towny-Core
 version: ${project.version}
 main: de.n04h.towny.core.Core
-api-version: 1.16
+api-version: 1.17
 prefix: TOWNY
 load: STARTUP
 authors: [ NoahBlaaa15 ]
@@ -15,3 +15,5 @@ commands:
   town:
   schematics:
   worlds:
+  chunckload:
+  eco:

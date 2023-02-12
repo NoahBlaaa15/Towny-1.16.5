@@ -3,13 +3,18 @@ error : "§c§o"
 complete: "§a§o"
 info: "§8§o"
 hearts: "§c§l"
-damage: "§1§l"
+damage: "§4§l"
 defence: "§5§l"
 coinbonus: "§6§l"
 expbonus: "§e§l"
-admin: "§0Admin §8>> §0"
-dev: "§1Dev §8>> §1"
-mod: "§5Mod §8>> §5"
-vip: "§6VIP §8>> §6"
-global: "§eGLOBAL §8>> §e"
-player: "§7VIP §8>> §7"
+admin: "§bDev §8» §b"
+dev: "§bDev §8» §b"
+mod: "§5Mod §8» §5"
+vip: "§eVIP §8» §6"
+global: "§eGLOBAL §8» §e"
+player: "§7Verified §8» §7"
+chunks:
+  - -49#-18
+  - -58#-16
+  - -59#-16
+  - -59#-17

@@ -2,7 +2,9 @@ package de.n04h.towny.core.commands;
 
 import de.n04h.towny.core.Core;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public class PermissionTester implements Command{
     @Override
@@ -22,13 +24,20 @@ public class PermissionTester implements Command{
             return true;
         }
         String permission = args[0];
-        if(sender.hasPermission(permission)){
-            sender.addAttachment(core).setPermission(permission, false);
-            sender.sendMessage(Component.text(core.utilMSG.getComplete("Du hast nun nicht mehr die Permission: " + permission)));
+        Player p = null;
+        if(args.length > 1){
+            p = Bukkit.getPlayer(args[1]);
+        }else{
+            p = (Player) sender;
+        }
+
+        if(p.hasPermission(permission)){
+            p.addAttachment(core).setPermission(permission, false);
+            sender.sendMessage(Component.text(core.utilMSG.getComplete(p.getName() + " hat nun nicht mehr die Permission: " + permission)));
             return true;
         }
-        sender.addAttachment(core).setPermission(permission, true);
-        sender.sendMessage(Component.text(core.utilMSG.getComplete("Du hast nun die Permission: " + permission)));
+        p.addAttachment(core).setPermission(permission, true);
+        sender.sendMessage(Component.text(core.utilMSG.getComplete(p.getName() + " hat nun die Permission: " + permission)));
         return true;
     }
 }

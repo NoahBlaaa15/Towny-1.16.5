@@ -1,6 +1,8 @@
 package de.n04h.towny.core.utils;
 
 import de.n04h.towny.core.Core;
+import org.bukkit.Location;
+
 
 public class MSG {
 
@@ -19,6 +21,10 @@ public class MSG {
 
     public String getInfo(String msg){
         return core.utilConfig.getPrefix() + core.utilConfig.getInfo() + msg;
+    }
+
+    public String getLoc(Location loc){
+        return "[X: " + loc.getX() + ", Y: " + loc.getY() + ", Z: " + loc.getZ() + "]";
     }
 
 }

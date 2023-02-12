@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class Town implements Command{
+
     @Override
     public String callName() {
         return "town";
@@ -27,9 +28,11 @@ public class Town implements Command{
                     sender.sendMessage(core.utilMSG.getError("Benutze /town create <Stadtname>"));
                     return true;
                 }
-                core.utilSchema.stringToBlocks("STONE:0:0:0#OAK_LOG:0:1:0", (Player) sender);
+                //core.utilSchema.stringToBlocks("STONE:0:0:0#OAK_LOG:0:1:0", (Player) sender, false);
 
                 break;
+            default:
+                sender.sendMessage(core.utilMSG.getInfo(core.getTownPlayer(((Player) sender)).getTown().getName()));
         }
 
 

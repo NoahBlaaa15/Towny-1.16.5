@@ -1,17 +1,16 @@
 package de.n04h.towny.core.utils;
 
 import de.n04h.towny.core.Core;
+import de.n04h.towny.core.mobs.Berater;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.type.Slab;
+import org.bukkit.block.Sign;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class SCHEMATICA {
 
@@ -47,15 +46,20 @@ public class SCHEMATICA {
             }
         }*/
 
-        //TODO: Name
-        blocks += "*NAME*" + "$";
         BlockFace pFace = p.getFacing();
         for(int x = lowestX; x <= highestX; x++) {
             for (int y = lowestY; y <= highestY; y++) {
                 for (int z = lowestZ; z <= highestZ; z++) {
                     Location loc = new Location(p.getWorld(), x, y, z);
-                    Material blockMaterial = loc.getBlock().getType();
-                    String data = loc.getBlock().getBlockData().getAsString();
+                    String blockMaterial = null;
+                    String data = null;
+                    if(loc.getBlock().getState() instanceof Sign && PlainTextComponentSerializer.plainText().serialize(((Sign) loc.getBlock().getState()).line(0)).contains("ENTITY")){
+                        blockMaterial = "ENTITY";
+                        data = PlainTextComponentSerializer.plainText().serialize(((Sign) loc.getBlock().getState()).line(0));
+                    }else {
+                        blockMaterial = loc.getBlock().getType().toString();
+                        data = loc.getBlock().getBlockData().getAsString();
+                    }
                     loc = loc.subtract(p.getLocation().getBlock().getLocation());
                     switch(pFace){
                         case NORTH:
@@ -83,8 +87,6 @@ public class SCHEMATICA {
 
     //String: STONE:0:0:0#OAK_LOG:0:1:0
     public String stringToBlocks(String blockList, Player p){
-        String name = blockList.split("\\$")[0];
-        blockList = blockList.split("\\$")[1];
         Location pLoc = p.getLocation().getBlock().getLocation();
         BlockFace pFace = p.getFacing();
         switch (pFace) {
@@ -99,27 +101,61 @@ public class SCHEMATICA {
         blockList = replaceFacing(pFace, blockList);
         for (String block: blockList.split("#")
              ) {
-            Material blockMaterial = Material.valueOf(block.split("%")[0]);
-            Location location = null;
-            switch (pFace) {
-                case NORTH:
-                    location = addLocation(pLoc, Double.parseDouble(block.split("%")[1]), Double.parseDouble(block.split("%")[2]), Double.parseDouble(block.split("%")[3]));
-                    break;
-                case EAST:
-                    location = addLocation(pLoc, Double.parseDouble(block.split("%")[3]) * -1D, Double.parseDouble(block.split("%")[2]), Double.parseDouble(block.split("%")[1]) * -1D);
-                    break;
-                case SOUTH:
-                    location = addLocation(pLoc, Double.parseDouble(block.split("%")[1]) * -1D, Double.parseDouble(block.split("%")[2]), Double.parseDouble(block.split("%")[3]) * -1D);
-                    break;
-                case WEST:
-                    location = addLocation(pLoc, Double.parseDouble(block.split("%")[3]), Double.parseDouble(block.split("%")[2]), Double.parseDouble(block.split("%")[1]));
-                    break;
+            if(!block.split("%")[0].equals("ENTITY")) {
+                Location location = null;
+                switch (pFace) {
+                    case NORTH:
+                        location = addLocation(pLoc, Double.parseDouble(block.split("%")[1]), Double.parseDouble(block.split("%")[2]), Double.parseDouble(block.split("%")[3]));
+                        break;
+                    case EAST:
+                        location = addLocation(pLoc, Double.parseDouble(block.split("%")[3]) * -1D, Double.parseDouble(block.split("%")[2]), Double.parseDouble(block.split("%")[1]) * -1D);
+                        break;
+                    case SOUTH:
+                        location = addLocation(pLoc, Double.parseDouble(block.split("%")[1]) * -1D, Double.parseDouble(block.split("%")[2]), Double.parseDouble(block.split("%")[3]) * -1D);
+                        break;
+                    case WEST:
+                        location = addLocation(pLoc, Double.parseDouble(block.split("%")[3]), Double.parseDouble(block.split("%")[2]), Double.parseDouble(block.split("%")[1]));
+                        break;
+                }
+
+                Material blockMaterial = Material.valueOf(block.split("%")[0]);
+                location.getBlock().setType(blockMaterial);
+                location.getBlock().setBlockData(core.getServer().createBlockData(block.split("%")[4]));
+            }
+        }
+        return "Erfolgreich";
+    }
+
+    public String stringToEntity(String blockList, Player p, String Stadtname){
+        Location pLoc = p.getLocation().getBlock().getLocation();
+        BlockFace pFace = p.getFacing();
+        for (String block: blockList.split("#")
+        ) {
+            if(block.split("%")[0].equals("ENTITY")){
+                Location location = null;
+                switch (pFace) {
+                    case NORTH:
+                        location = addLocation(pLoc, Double.parseDouble(block.split("%")[1]), Double.parseDouble(block.split("%")[2]), Double.parseDouble(block.split("%")[3]));
+                        break;
+                    case EAST:
+                        location = addLocation(pLoc, Double.parseDouble(block.split("%")[3]) * -1D, Double.parseDouble(block.split("%")[2]), Double.parseDouble(block.split("%")[1]) * -1D);
+                        break;
+                    case SOUTH:
+                        location = addLocation(pLoc, Double.parseDouble(block.split("%")[1]) * -1D, Double.parseDouble(block.split("%")[2]), Double.parseDouble(block.split("%")[3]) * -1D);
+                        break;
+                    case WEST:
+                        location = addLocation(pLoc, Double.parseDouble(block.split("%")[3]), Double.parseDouble(block.split("%")[2]), Double.parseDouble(block.split("%")[1]));
+                        break;
+                }
+
+
+                switch (block.split("%")[4]){
+                    case "ENTITY_BERATER":
+                        ((CraftWorld) location.getWorld()).getHandle().addEntity(new Berater(location, pFace, Stadtname));
+                        break;
+                }
             }
 
-            if (location.getBlock().getType() != Material.BEDROCK && location.getBlock().getType() != Material.OBSIDIAN)
-                location.getBlock().breakNaturally();
-            location.getBlock().setType(blockMaterial);
-            location.getBlock().setBlockData(core.getServer().createBlockData(block.split("%")[4]));
         }
         return "Erfolgreich";
     }
@@ -168,5 +204,57 @@ public class SCHEMATICA {
         return loc1;
     }
 
+    public void replaceArea(Location pos1, Location pos2, Material matR){
+        int x1 = pos1.getBlockX();
+        int y1 = pos1.getBlockY();
+        int z1 = pos1.getBlockZ();
 
+        int x2 = pos2.getBlockX();
+        int y2 = pos2.getBlockY();
+        int z2 = pos2.getBlockZ();
+
+        int lowestX = Math.min(x1, x2);
+        int lowestY = Math.min(y1, y2);
+        int lowestZ = Math.min(z1, z2);
+
+        int highestX = lowestX == x1 ? x2 : x1;
+        int highestY = lowestY == y1 ? y2 : y1;
+        int highestZ = lowestZ == z1 ? z2 : z1;
+
+        for(int x = lowestX; x <= highestX; x++) {
+            for (int y = lowestY; y <= highestY; y++) {
+                for (int z = lowestZ; z <= highestZ; z++) {
+                    new Location(pos1.getWorld(), x, y, z).getBlock().setType(matR);
+                }
+            }
+        }
+    }
+
+    public void replaceBlockArea(Location pos1, Location pos2, Material matR, Material replaceMat){
+        int x1 = pos1.getBlockX();
+        int y1 = pos1.getBlockY();
+        int z1 = pos1.getBlockZ();
+
+        int x2 = pos2.getBlockX();
+        int y2 = pos2.getBlockY();
+        int z2 = pos2.getBlockZ();
+
+        int lowestX = Math.min(x1, x2);
+        int lowestY = Math.min(y1, y2);
+        int lowestZ = Math.min(z1, z2);
+
+        int highestX = lowestX == x1 ? x2 : x1;
+        int highestY = lowestY == y1 ? y2 : y1;
+        int highestZ = lowestZ == z1 ? z2 : z1;
+
+        for(int x = lowestX; x <= highestX; x++) {
+            for (int y = lowestY; y <= highestY; y++) {
+                for (int z = lowestZ; z <= highestZ; z++) {
+                    if(new Location(pos1.getWorld(), x, y, z).getBlock().getType() == replaceMat) {
+                        new Location(pos1.getWorld(), x, y, z).getBlock().setType(matR);
+                    }
+                }
+            }
+        }
+    }
 }
